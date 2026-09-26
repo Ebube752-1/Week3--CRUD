@@ -1,30 +1,25 @@
-require('dotenv').config();
-
-const express = require('express');
 const mongoose = require('mongoose');
 
-const app = express();
+const expenseSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Atlas connected'))
-  .catch((error) => console.log('MongoDB connection error:', error));
+  amount: {
+    type: Number,
+    required: true
+  },
 
-app.use(express.json());
+  category: {
+    type: String,
+    required: true
+  },
 
-// Import routes
-const atlasRoutes = require('./routes/atlas');
-
-// Use CRUD routes
-app.use('/', atlasRoutes);
-
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Spend Wise API is running'
-  });
+  date: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-const PORT = 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = mongoose.model('Expense', expenseSchema);

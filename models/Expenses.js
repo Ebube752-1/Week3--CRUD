@@ -1,111 +1,30 @@
+require('dotenv').config();
+
 const express = require('express');
-const Expense = require('../models/expenses');
+const mongoose = require('mongoose');
 
-const router = express.Router();
+const app = express();
 
-// CREATE expense
-router.post('/expenses', async (req, res) => {
-  try {
-    const expense = await Expense.create(req.body);
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Atlas connected'))
+  .catch((error) => console.log('MongoDB connection error:', error));
 
-    res.status(201).json(expense);
-  } catch (error) {
-    res.status(400).json({
-      message: 'Failed to create expense',
-      error: error.message
-    });
-  }
-});
+app.use(express.json());
 
-// READ all expenses
-router.get('/expenses', async (req, res) => {
-  try {
-    const expenses = await Expense.find();
+// Import routes
+const atlasRoutes = require('./routes/atlas');
 
-    res.status(200).json(expenses);
-  } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch expenses',
-      error: error.message
-    });
-  }
-});
+// Use CRUD routes
+app.use('/', atlasRoutes);
 
-// READ one expense
-router.get('/expenses/:id', async (req, res) => {
-  try {
-    const expense = await Expense.findById(req.params.id);
-
-    if (!expense) {
-      return res.status(404).json({
-        message: 'Expense not found'
-      });
-    }
-
-    res.status(200).json(expense);
-  } catch (error) {
-    res.status(400).json({
-      message: 'Invalid expense ID',
-      error: error.message
-    });
-  }
-});
-
-// UPDATE expense
-router.put('/expenses/:id', async (req, res) => {
-  try {
-    const expense = await Expense.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
-
-    if (!expense) {
-      return res.status(404).json({
-        message: 'Expense not found'
-      });
-    }
-
-    res.status(200).json(expense);
-  } catch (error) {
-    res.status(400).json({
-      message: 'Failed to update expense',
-      error: error.message
-    });
-  }
-});
-
-// DELETE expense
-router.delete('/expenses/:id', async (req, res) => {
-  try {
-    const expense = await Expense.findByIdAndDelete(req.params.id);
-
-    if (!expense) {
-      return res.status(404).json({
-        message: 'Expense not found'
-      });
-    }
-
-    res.status(200).json({
-      message: 'Expense deleted successfully',
-      expense
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: 'Invalid expense ID',
-      error: error.message
-    });
-  }
-});
-
-// SUMMARY
-router.get('/summary', (req, res) => {
+app.get('/', (req, res) => {
   res.json({
-    message: 'Atlas summary - TODO: Group A implement'
+    message: 'Spend Wise API is running'
   });
 });
 
-module.exports = router;
+const PORT = 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
